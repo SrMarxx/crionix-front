@@ -2,127 +2,97 @@
 import { ref } from 'vue'
 import type { Ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
-import { useRouter } from 'vue-router'
-import ForceChangePassword from '@/components/ForceChangePassword.vue'
-
-type LoginStep = 'form' | 'loading' | 'changePassword'
 
 const authStore = useAuthStore()
-const router = useRouter()
+const emit = defineEmits(['passwordChanged'])
 
-const loginStep: Ref<LoginStep> = ref('form')
-const matricula: Ref<string> = ref('')
-const senha: Ref<string> = ref('')
+const senhaAntiga: Ref<string> = ref('')
+const novaSenha: Ref<string> = ref('')
+const confirmarSenha: Ref<string> = ref('')
 const errorMessage: Ref<string> = ref('')
+const isSubmitting: Ref<boolean> = ref(false)
 
-const handleLogin = async () => {
-  errorMessage.value = ''
-  loginStep.value = 'loading'
-  try {
-    await authStore.login(matricula.value, senha.value)
-    const userProfile = await authStore.fetchUserProfile()
-    if (userProfile?.mustChangePassword) {
-      loginStep.value = 'changePassword'
-      console.log('User must change password')
-    } else {
-      console.log('Login successful, redirecting to dashboard')
-      console.log('User Profile:', userProfile)
-      router.push('/dashboard')
-    }
-  } catch (error) {
-    console.error('Login error:', error)
-    errorMessage.value = 'Login failed: '
-    loginStep.value = 'form'
+const handleSubmit = async () => {
+  if (novaSenha.value !== confirmarSenha.value) {
+    errorMessage.value = 'A nova senha e a confirmação não coincidem.'
+    return
   }
-}
-const onPasswordChanged = () => {
-  router.push('/dashboard')
+  if (novaSenha.value.length < 8) {
+    errorMessage.value = 'A nova senha deve ter pelo menos 8 caracteres.'
+    return
+  }
+
+  isSubmitting.value = true
+  errorMessage.value = ''
+
+  try {
+    await authStore.changePassword({
+      senhaAntiga: senhaAntiga.value,
+      novaSenha: novaSenha.value,
+    })
+    emit('passwordChanged')
+  } catch (error) {
+    errorMessage.value = 'Erro ao alterar a senha. Verifique a senha antiga e tente novamente.'
+    console.error(error)
+  } finally {
+    isSubmitting.value = false
+  }
 }
 </script>
 
 <template>
-  <div class="fnix-login-bg">
-    <div class="fnix-login-card">
-      <div class="fnix-login-header">
-        <div class="fnix-icon-gradient">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="lucide lucide-snowflake h-8 w-8 text-white"
-            aria-hidden="true"
-          >
-            <path d="m10 20-1.25-2.5L6 18"></path>
-            <path d="M10 4 8.75 6.5 6 6"></path>
-            <path d="m14 20 1.25-2.5L18 18"></path>
-            <path d="m14 4 1.25 2.5L18 6"></path>
-            <path d="m17 21-3-6h-4"></path>
-            <path d="m17 3-3 6 1.5 3"></path>
-            <path d="M2 12h6.5L10 9"></path>
-            <path d="m20 10-1.5 2 1.5 2"></path>
-            <path d="M22 12h-6.5L14 15"></path>
-            <path d="m4 10 1.5 2L4 14"></path>
-            <path d="m7 21 3-6-1.5-3"></path>
-            <path d="m7 3 3 6h4"></path>
-          </svg>
+  <div class="change-password-container">
+    <h3>Alteração de senha obrigatória</h3>
+    <p>Por segurança, você deve alterar sua senha no primeiro acesso.</p>
+    <form @submit.prevent="handleSubmit" class="fnix-login-form">
+      <div class="fnix-input-group">
+        <label for="old-password">Senha Antiga (Temporária)</label>
+        <div class="fnix-input-wrapper">
+          <input type="password" v-model="senhaAntiga" id="old-password" required />
+          <i class="fas fa-lock icon-lock"></i>
         </div>
-        <h1 class="fnix-title">Login</h1>
-        <p class="fnix-subtitle">Sistema FrigoNix</p>
       </div>
-
-      <div v-if="loginStep === 'loading'" class="fnix-loading">
-        <span class="spinner"></span>
-        <p class="fnix-loading-text">Verificando...</p>
+      <div class="fnix-input-group">
+        <label for="new-password">Nova Senha</label>
+        <div class="fnix-input-wrapper">
+          <input type="password" v-model="novaSenha" id="new-password" required />
+          <i class="fas fa-lock icon-lock"></i>
+        </div>
       </div>
-
-      <form v-if="loginStep === 'form'" @submit.prevent="handleLogin" class="fnix-login-form">
-        <div class="fnix-input-group">
-          <label for="matricula">Matrícula</label>
-          <div class="fnix-input-wrapper">
-            <input
-              type="text"
-              id="matricula"
-              v-model="matricula"
-              placeholder="Digite sua matrícula"
-              required
-            />
-            <i class="fas fa-user icon-user"></i>
-          </div>
+      <div class="fnix-input-group">
+        <label for="confirm-password">Confirme a Nova Senha</label>
+        <div class="fnix-input-wrapper">
+          <input type="password" v-model="confirmarSenha" id="confirm-password" required />
+          <i class="fas fa-lock icon-lock"></i>
         </div>
-        <div class="fnix-input-group">
-          <label for="password">Senha</label>
-          <div class="fnix-input-wrapper">
-            <input
-              type="password"
-              id="password"
-              v-model="senha"
-              placeholder="Digite sua senha"
-              required
-            />
-            <i class="fas fa-lock icon-lock"></i>
-          </div>
-        </div>
-        <div v-if="errorMessage" class="fnix-error">{{ errorMessage }}</div>
+      </div>
+      <div v-if="errorMessage" class="fnix-error">{{ errorMessage }}</div>
 
-        <button type="submit" class="fnix-btn-primary">Entrar</button>
-      </form>
-
-      <ForceChangePassword
-        v-if="loginStep === 'changePassword'"
-        @passwordChanged="onPasswordChanged"
-      />
-    </div>
+      <button type="submit" class="fnix-btn-primary" :disabled="isSubmitting">
+        {{ isSubmitting ? 'Salvando...' : 'Alterar Senha' }}
+      </button>
+    </form>
   </div>
 </template>
-
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+.change-password-container {
+  text-align: left;
+  width: 100%;
+}
+h3 {
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+p {
+  text-align: center;
+  color: #555;
+  margin-bottom: 2rem;
+  font-size: 0.9em;
+}
 
 .fnix-icon-gradient {
   width: 54px;
