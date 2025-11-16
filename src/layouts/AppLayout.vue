@@ -22,7 +22,7 @@ import AppHeader from '@/components/AppHeader.vue'
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background-color: #f4f7f6;
+  background-color: var(--bg-main);
 }
 .main-content {
   flex-grow: 1;

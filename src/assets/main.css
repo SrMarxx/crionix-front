@@ -24,3 +24,61 @@ body {
   height: 100%;
   width: 100%;
 }
+
+:root {
+  --bg-main: #f7fafc;
+  --bg-card: #fff;
+  --bg-gradient: linear-gradient(135deg, #e6f2fe 0%, #ffffff 70%, #9be1ff 100%);
+  --bg-input: #f9fbfc;
+  --bg-input-focus: #fff;
+  --bg-error: #fff5f5;
+
+  --text-main: #29384d;
+  --text-label: #4f5966;
+  --text-subtitle: #979faa;
+  --text-error: #f25a5a;
+  --text-accent: #0081f2;
+
+  --input-border: #d7e2ed;
+  --input-border-focus: #0081f2;
+  --card-border: #ececec;
+  --btn-bg: #0081f2;
+  --btn-bg-hover: #3ac0ef;
+  --btn-text: #fff;
+  --icon-primary: #0081f2;
+  --icon-secondary: #34322d;
+
+  --box-shadow-main: 0 4px 32px rgba(0, 0, 0, 0.08);
+  --header-shadow: #0081f212;
+
+  --text-error-hover: #b51c14;
+  --menu-shadow: 0 4px 24px rgba(0, 129, 242, 0.08);
+  --spinner-color: var(--btn-bg);
+}
+
+.dark {
+  --bg-main: #19202c;
+  --bg-card: #232a37;
+  --bg-gradient: linear-gradient(135deg, #242b36 0%, #1e232c 100%);
+  --bg-input: #222836;
+  --bg-input-focus: #232a37;
+  --bg-error: #38171a;
+
+  --text-main: #e0e7ef;
+  --text-label: #b0bdcd;
+  --text-subtitle: #8fc6ea;
+  --text-error: #e94840;
+  --text-accent: #34c9ef;
+
+  --input-border: #344054;
+  --input-border-focus: #34c9ef;
+  --card-border: #2e3749;
+  --btn-bg: #34c9ef;
+  --btn-bg-hover: #0081f2;
+  --btn-text: #e0e7ef;
+  --icon-primary: #34c9ef;
+  --icon-secondary: #e0e7ef;
+
+  --box-shadow-main: 0 4px 32px rgba(52, 201, 239, 0.1);
+  --header-shadow: #34c9ef25;
+}

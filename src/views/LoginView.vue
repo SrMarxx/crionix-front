@@ -131,16 +131,16 @@ const onPasswordChanged = () => {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: linear-gradient(135deg, #0081f2 10%, #34c9ef 80%);
-  box-shadow: 0 2px 12px #0081f245;
+  background: linear-gradient(135deg, var(--btn-bg) 15%, var(--btn-bg-hover) 70%);
+  box-shadow: 0 2px 12px var(--header-shadow);
 }
 .fnix-icon-gradient svg {
-  color: white;
+  color: var(--btn-text);
 }
 .lucide-snowflake {
   width: 36px;
   height: 36px;
-  /* O stroke fica branco pelo atributo stroke="white" no SVG */
+  /* stroke branco pelo atributo stroke="currentColor" no SVG + .fnix-icon-gradient svg color */
 }
 
 .fnix-login-bg {
@@ -148,19 +148,19 @@ const onPasswordChanged = () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #e6f2fe 0%, #ffffff 70%, #9be1ff 100%);
+  background: var(--bg-gradient);
 }
 
 .fnix-login-card {
-  background: #fff;
+  background: var(--bg-card);
   border-radius: 24px;
-  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--box-shadow-main);
   padding: 2.5rem 2rem;
   width: 370px;
   display: flex;
   flex-direction: column;
   gap: 2rem;
-  border: 1px solid #ececec;
+  border: 1px solid var(--card-border);
 }
 
 .fnix-login-header {
@@ -174,13 +174,13 @@ const onPasswordChanged = () => {
   font-family: 'Inter', 'SF Pro', 'Roboto', sans-serif;
   font-weight: 700;
   font-size: 1.7rem;
-  color: #0081f2;
+  color: var(--text-accent);
   margin-top: 10px;
 }
 
 .fnix-subtitle {
   font-size: 1rem;
-  color: #979faa;
+  color: var(--text-subtitle);
   font-family: 'Inter', 'SF Pro', 'Roboto', sans-serif;
 }
 
@@ -196,6 +196,11 @@ const onPasswordChanged = () => {
   gap: 0.35rem;
 }
 
+.fnix-input-group label {
+  color: var(--text-label);
+  font-size: 1rem;
+}
+
 /* Wrapper para posicionar o ícone corretamente */
 .fnix-input-wrapper {
   position: relative;
@@ -206,19 +211,28 @@ const onPasswordChanged = () => {
 /* Input ocupa todo o espaço horizontal */
 .fnix-input-wrapper input {
   width: 100%;
-  padding: 0.8em 2.2em 0.8em 1em; /* espaço extra no lado direito para o ícone */
+  padding: 0.8em 2.2em 0.8em 1em;
   border-radius: 10px;
-  border: 1.5px solid #d7e2ed;
-  background: #f9fbfc;
-  color: #24292e;
+  border: 1.5px solid var(--input-border);
+  background: var(--bg-input);
+  color: var(--text-main);
   font-size: 1rem;
   transition:
     border 0.18s,
-    box-shadow 0.18s;
+    box-shadow 0.18s,
+    background 0.15s,
+    color 0.15s;
   font-family: 'Inter', 'SF Pro', 'Roboto', sans-serif;
 }
 
-/* Ícone sempre visível à direita e alinhado verticalmente */
+.fnix-input-wrapper input:focus {
+  border-color: var(--input-border-focus);
+  background: var(--bg-input-focus);
+  outline: none;
+  box-shadow: 0 0 0 2px var(--input-border-focus);
+  color: var(--text-main);
+}
+
 .icon-user,
 .icon-lock {
   position: absolute;
@@ -226,33 +240,21 @@ const onPasswordChanged = () => {
   top: 50%;
   transform: translateY(-50%);
   font-size: 1.15rem;
-  color: #0081f2;
+  color: var(--icon-primary);
   opacity: 0.78;
   pointer-events: none;
   transition: color 0.25s;
 }
 
-.fnix-input-group label {
-  color: #4f5966;
-  font-size: 1rem;
-}
-
-.fnix-input-group input:focus + .icon-user,
-.fnix-input-group input:focus + .icon-lock {
-  color: #34322d;
+.fnix-input-wrapper input:focus + .icon-user,
+.fnix-input-wrapper input:focus + .icon-lock {
+  color: var(--icon-secondary);
   opacity: 1;
 }
 
-.fnix-input-group input:focus {
-  border-color: #0081f2;
-  background: #fff;
-  outline: none;
-  box-shadow: 0 0 0 2px #0081f228;
-}
-
 .fnix-error {
-  color: #f25a5a;
-  background: #fff5f5;
+  color: var(--text-error);
+  background: var(--bg-error);
   padding: 0.5em 1em;
   border-radius: 7px;
   font-size: 0.98rem;
@@ -263,12 +265,12 @@ const onPasswordChanged = () => {
   padding: 0.9em 0;
   border-radius: 10px;
   border: none;
-  background-color: #0081f2;
-  color: #fff;
+  background-color: var(--btn-bg);
+  color: var(--btn-text);
   font-size: 1.08rem;
   font-weight: 600;
   font-family: 'Inter', 'SF Pro', 'Roboto', sans-serif;
-  box-shadow: 0 2px 8px #0081f231;
+  box-shadow: 0 2px 8px var(--btn-bg);
   cursor: pointer;
   transition:
     background 0.2s,
@@ -276,7 +278,7 @@ const onPasswordChanged = () => {
 }
 
 .fnix-btn-primary:hover {
-  background-color: #3ac0ef;
+  background-color: var(--btn-bg-hover);
   transform: translateY(-2px) scale(1.01);
 }
 
@@ -290,8 +292,8 @@ const onPasswordChanged = () => {
 .spinner {
   width: 36px;
   height: 36px;
-  border: 3.5px solid #dadeef;
-  border-top: 3.5px solid #0081f2;
+  border: 3.5px solid var(--input-border);
+  border-top: 3.5px solid var(--btn-bg);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -306,9 +308,31 @@ const onPasswordChanged = () => {
 }
 
 .fnix-loading-text {
-  color: #0081f2;
+  color: var(--text-accent);
   font-size: 1.08rem;
   font-weight: 500;
   font-family: 'Inter', 'SF Pro', 'Roboto', sans-serif;
+}
+
+/* Responsividade básica para mobile */
+@media (max-width: 600px) {
+  .fnix-login-card {
+    width: 96vw;
+    padding: 2rem 1rem;
+  }
+  .fnix-title {
+    font-size: 1.2rem;
+  }
+  .fnix-subtitle {
+    font-size: 0.9rem;
+  }
+  .lucide-snowflake {
+    width: 28px;
+    height: 28px;
+  }
+  .fnix-icon-gradient {
+    width: 40px;
+    height: 40px;
+  }
 }
 </style>

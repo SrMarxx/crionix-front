@@ -1,15 +1,16 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { onClickOutside } from '@vueuse/core'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useThemeStore } from '@/stores/theme'
 
+const themeStore = useThemeStore()
 const authStore = useAuthStore()
 const router = useRouter()
 const menuOpen = ref(false)
 const isMobile = ref(window.innerWidth <= 600)
 const configOpen = ref(false)
-const darkMode = ref(false)
 
 function goTo(path: string) {
   menuOpen.value = false
@@ -26,10 +27,11 @@ function toggleConfigMenu() {
   configOpen.value = !configOpen.value
 }
 function toggleDarkMode() {
-  darkMode.value = !darkMode.value
-  // Aqui você pode aplicar theme ao HTML ou usar solução do seu projeto
+  themeStore.toggle()
   configOpen.value = false
 }
+
+const darkMode = computed(() => themeStore.dark)
 
 const menuConfigRef = ref(null)
 onClickOutside(menuConfigRef, () => {
@@ -114,10 +116,11 @@ onClickOutside(menuConfigRef, () => {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
 
+/* Header */
 .fnix-header {
-  background: #fff;
-  border-bottom: 1.5px solid #ececec;
-  box-shadow: 0 2px 12px #0081f212;
+  background: var(--bg-card);
+  border-bottom: 1.5px solid var(--card-border);
+  box-shadow: 0 2px 12px var(--header-shadow);
   position: sticky;
   top: 0;
   z-index: 50;
@@ -145,24 +148,25 @@ onClickOutside(menuConfigRef, () => {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: linear-gradient(135deg, #0081f2 10%, #34c9ef 80%);
-  box-shadow: 0 2px 12px #0081f2a2;
+  background: linear-gradient(135deg, var(--btn-bg) 15%, var(--btn-bg-hover) 70%);
+  box-shadow: 0 2px 12px var(--header-shadow);
 }
 .lucide-snowflake {
   width: 32px;
   height: 32px;
+  color: var(--btn-text);
 }
 .fnix-header-title {
   font-family: 'Inter', 'SF Pro', 'Roboto', sans-serif;
   font-weight: 700;
   font-size: 1.45rem;
-  color: #0081f2;
+  color: var(--text-accent);
   margin: 0;
   margin-bottom: 2px;
 }
 .fnix-header-subtitle {
   font-size: 0.96rem;
-  color: #979faa;
+  color: var(--text-subtitle);
   margin: 0;
   font-family: 'Inter', 'SF Pro', 'Roboto', sans-serif;
 }
@@ -182,10 +186,10 @@ onClickOutside(menuConfigRef, () => {
   right: 0;
   top: 43px;
   width: 175px;
-  background: #fff;
-  border: 1.5px solid #dae3ee;
+  background: var(--bg-card);
+  border: 1.5px solid var(--card-border);
   border-radius: 12px;
-  box-shadow: 0 4px 24px #0081f222;
+  box-shadow: 0 4px 24px var(--header-shadow);
   z-index: 200;
   display: flex;
   flex-direction: column;
@@ -197,7 +201,7 @@ onClickOutside(menuConfigRef, () => {
   padding: 13px 15px;
   font-size: 1rem;
   font-family: 'Inter', 'SF Pro', 'Roboto', sans-serif;
-  color: #0081f2;
+  color: var(--text-accent);
   text-align: left;
   display: flex;
   align-items: center;
@@ -209,15 +213,15 @@ onClickOutside(menuConfigRef, () => {
     color 0.14s;
 }
 .config-menu-item:hover {
-  background: #e6f2fe;
-  color: #34c9ef;
+  background: var(--bg-input);
+  color: var(--btn-bg-hover);
 }
 .logout-button {
-  color: #e94840;
+  color: var(--text-error);
 }
 .logout-button:hover {
-  background: #ffebe9;
-  color: #b51c14;
+  background: var(--bg-error);
+  color: #b51c14; /* vermelho mais escuro pode ser uma nova variável, ex: --text-error-hover */
 }
 .menu-text {
   flex: 1 1 auto;
@@ -242,21 +246,21 @@ onClickOutside(menuConfigRef, () => {
   height: 39px;
   font-size: 1rem;
   font-family: 'Inter', 'SF Pro', 'Roboto', sans-serif;
-  background: linear-gradient(90deg, #f7fafc 60%, #e6f2fe 100%);
-  color: #0081f2;
-  border: 1px solid #dae3ee;
+  background: linear-gradient(90deg, var(--bg-input) 60%, var(--bg-main) 100%);
+  color: var(--text-accent);
+  border: 1px solid var(--input-border);
   border-radius: 10px;
   font-weight: 500;
   cursor: pointer;
-  box-shadow: 0 2px 6px #0081f210;
+  box-shadow: 0 2px 6px var(--header-shadow);
   transition:
     background 0.22s,
     box-shadow 0.18s,
     transform 0.11s;
 }
 .fnix-header-btn:hover {
-  background: linear-gradient(90deg, #34c9ef 60%, #0081f2 100%);
-  color: #fff;
+  background: linear-gradient(90deg, var(--btn-bg-hover) 60%, var(--btn-bg) 100%);
+  color: var(--btn-text);
   transform: scale(1.03) translateY(-2.5px);
 }
 .fnix-header-btn-label {
@@ -265,25 +269,24 @@ onClickOutside(menuConfigRef, () => {
 .fnix-header-btn-circle {
   width: 40px;
   height: 40px;
-  background: linear-gradient(135deg, #0081f2 15%, #34c9ef 70%);
-  color: #fff;
+  background: linear-gradient(135deg, var(--btn-bg) 15%, var(--btn-bg-hover) 70%);
+  color: var(--btn-text);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.15rem;
   border: none;
-  box-shadow: 0 2px 8px #0081f210;
+  box-shadow: 0 2px 8px var(--header-shadow);
   cursor: pointer;
   transition:
     background 0.22s,
     transform 0.13s;
 }
 .fnix-header-btn-circle:hover {
-  background: linear-gradient(135deg, #34c9ef 12%, #0081f2 90%);
+  background: linear-gradient(135deg, var(--btn-bg-hover) 12%, var(--btn-bg) 90%);
   transform: scale(1.09) translateY(-1.5px);
 }
-
 .fnix-header-btn-circle i {
   transform: translateX(6.5px);
 }
@@ -304,12 +307,13 @@ onClickOutside(menuConfigRef, () => {
   cursor: pointer;
   margin-left: 6px;
   transition: background 0.16s;
+  color: var(--btn-bg);
 }
 .fnix-header-burger span {
   width: 22px;
   height: 3px;
   border-radius: 2px;
-  background: #0081f2;
+  background: var(--btn-bg);
   display: block;
   transition: all 0.18s;
 }
@@ -320,10 +324,10 @@ onClickOutside(menuConfigRef, () => {
   right: 16px;
   top: 60px;
   z-index: 100;
-  background: #fff;
-  border: 1.5px solid #dae3ee;
+  background: var(--bg-card);
+  border: 1.5px solid var(--card-border);
   border-radius: 10px;
-  box-shadow: 0 4px 16px #0081f222;
+  box-shadow: 0 4px 16px var(--header-shadow);
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -335,7 +339,7 @@ onClickOutside(menuConfigRef, () => {
   border: none;
   font-family: 'Inter', 'SF Pro', 'Roboto', sans-serif;
   font-size: 1.01rem;
-  color: #0081f2;
+  color: var(--text-accent);
   padding: 11px 19px;
   text-align: left;
   cursor: pointer;
@@ -348,8 +352,8 @@ onClickOutside(menuConfigRef, () => {
     color 0.14s;
 }
 .fnix-mobile-menu button:hover {
-  background: #e6f2fe;
-  color: #34c9ef;
+  background: var(--bg-input);
+  color: var(--btn-bg-hover);
 }
 
 /* Responsividade para tablets */
