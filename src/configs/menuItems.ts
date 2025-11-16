@@ -12,11 +12,11 @@ export const menuItems = [
   {
     title: 'Equipamentos',
     path: '/equipments',
-    icon: 'fa-snowflake-o',
+    icon: 'fa-snowflake',
   },
   {
     title: 'Relatórios',
     path: '/reports',
-    icon: 'fa-file-text-o',
+    icon: 'fa-file-text',
   },
 ]

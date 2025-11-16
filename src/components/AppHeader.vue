@@ -4,6 +4,7 @@ import { onClickOutside } from '@vueuse/core'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useThemeStore } from '@/stores/theme'
+import { menuItems } from '@/configs/menuItems'
 
 const themeStore = useThemeStore()
 const authStore = useAuthStore()
@@ -94,7 +95,7 @@ onClickOutside(menuConfigRef, () => {
           </div>
         </div>
         <button class="fnix-header-btn-circle" @click="goTo('/profile')">
-          <i class="fa-solid fa-user"></i>        
+          <i class="fa-solid fa-user"></i>
         </button>
         <button
           class="fnix-header-burger"
@@ -105,9 +106,21 @@ onClickOutside(menuConfigRef, () => {
           <i class="fa fa-bars"></i>
         </button>
       </div>
+      <!-- MENU PRINCIPAL MOBILE -->
       <div v-if="menuOpen && isMobile" class="fnix-mobile-menu">
-        <button @click="goTo('/config')"><i class="fa-solid fa-gear"></i> Configurações</button>
+        <button v-for="item in menuItems" :key="item.title" @click="goTo(item.path)">
+          <i :class="['fas', item.icon]"></i>
+          <span>{{ item.title }}</span>
+        </button>
         <button @click="goTo('/profile')"><i class="fa-solid fa-user"></i> Perfil</button>
+        <button @click="toggleDarkMode">
+          <i class="fa-solid" :class="darkMode ? 'fa-sun' : 'fa-moon'"></i>
+          <span>Modo {{ darkMode ? 'Claro' : 'Escuro' }}</span>
+        </button>
+        <button class="logout-button" @click="authStore.logout">
+          <i class="fas fa-sign-out-alt"></i>
+          <span>Sair</span>
+        </button>
       </div>
     </div>
   </header>
@@ -116,7 +129,6 @@ onClickOutside(menuConfigRef, () => {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
 
-/* Header */
 .fnix-header {
   background: var(--bg-card);
   border-bottom: 1.5px solid var(--card-border);
@@ -221,7 +233,7 @@ onClickOutside(menuConfigRef, () => {
 }
 .logout-button:hover {
   background: var(--bg-error);
-  color: #b51c14; /* vermelho mais escuro pode ser uma nova variável, ex: --text-error-hover */
+  color: #b51c14;
 }
 .menu-text {
   flex: 1 1 auto;
@@ -287,9 +299,6 @@ onClickOutside(menuConfigRef, () => {
   background: linear-gradient(135deg, var(--btn-bg-hover) 12%, var(--btn-bg) 90%);
   transform: scale(1.09) translateY(-1.5px);
 }
-.fnix-header-btn-circle i {
-  transform: translateX(6.5px);
-}
 
 /* Hamburger button (mobile only) */
 .fnix-header-burger {
@@ -316,6 +325,10 @@ onClickOutside(menuConfigRef, () => {
   background: var(--btn-bg);
   display: block;
   transition: all 0.18s;
+}
+.fnix-header-burger i {
+  font-size: 1.43rem;
+  color: var(--btn-bg);
 }
 
 /* Mobile menu (hamburger) */
@@ -355,6 +368,11 @@ onClickOutside(menuConfigRef, () => {
   background: var(--bg-input);
   color: var(--btn-bg-hover);
 }
+.fnix-mobile-menu i {
+  font-size: 1.12rem;
+  min-width: 22px;
+  text-align: center;
+}
 
 /* Responsividade para tablets */
 @media (max-width: 900px) {
@@ -373,20 +391,29 @@ onClickOutside(menuConfigRef, () => {
 /* Responsividade para mobile + hamburger trigger */
 @media (max-width: 600px) {
   .container {
-    flex-direction: column;
+    flex-direction: row;
     height: auto;
-    gap: 0.2rem;
-    padding: 0 0.6rem;
-    align-items: flex-start;
+    gap: 0;
+    padding: 0.6rem;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 5px;
   }
   .flex-logo-title {
-    gap: 0.9rem;
+    gap: 0.7rem;
+    flex-shrink: 1;
+    min-width: 0;
   }
   .flex-user-buttons {
-    width: 100%;
+    width: auto;
     justify-content: flex-end;
-    margin-top: 6px;
+    margin-top: 0;
     gap: 0.5rem;
+    flex-shrink: 0;
+  }
+  .fnix-header-burger {
+    display: flex !important;
+    margin-left: 0;
   }
   .fnix-logo-circle {
     width: 38px;
@@ -399,9 +426,16 @@ onClickOutside(menuConfigRef, () => {
   .fnix-header-title {
     font-size: 1.06rem;
     margin-bottom: 0px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 130px;
   }
   .fnix-header-subtitle {
     font-size: 0.77rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .fnix-header-btn,
   .fnix-header-btn-circle {
