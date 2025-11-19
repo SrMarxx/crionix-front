@@ -85,11 +85,11 @@ h3 {
   text-align: center;
   margin-top: 0;
   margin-bottom: 0.5rem;
-  color: #333;
+  color: var(--text-main);
 }
 p {
   text-align: center;
-  color: #555;
+  color: var(--text-label);
   margin-bottom: 2rem;
   font-size: 0.9em;
 }

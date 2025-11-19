@@ -36,7 +36,6 @@ import NavMenu from '@/components/NavMenu.vue'
 
 .main-content {
   flex-grow: 1;
-  padding: 2.5rem;
   overflow-y: auto;
   background: var(--bg-main);
 }
