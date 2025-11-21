@@ -1,18 +1,31 @@
 <script setup lang="ts">
 import { menuItems } from '@/configs/menuItems'
 import { useRouter, useRoute } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import { computed } from 'vue'
 
 const router = useRouter()
 const route = useRoute()
 function goTo(path: string) {
   router.push(path)
 }
+
+const authStore = useAuthStore()
+
+const visibleMenuItems = computed(() => {
+  const userPermissions = authStore.permissions || new Set<string>()
+  console.log('Permissões na Sidebar:', authStore.permissions)
+
+  return menuItems.filter((item) => {
+    return !item.requiredPermission || userPermissions.has(item.requiredPermission)
+  })
+})
 </script>
 
 <template>
   <nav class="fnix-nav-menu">
     <ul>
-      <li v-for="item in menuItems" :key="item.title">
+      <li v-for="item in visibleMenuItems" :key="item.title">
         <button
           class="nav-menu-link"
           :class="{ 'is-active': route.path === item.path }"

@@ -38,6 +38,34 @@ const router = createRouter({
           name: 'reports',
           component: () => import('../views/ReportsView.vue'),
         },
+        {
+          path: '/administration',
+          name: 'administration',
+          component: () => import('../layouts/AdminLayout.vue'),
+          meta: {requiredPermission: 'CRIAR'},
+          children: [
+            {
+              path: '/administration',
+              name: 'administrationHome',
+              component: () => import('../views/administracao/AdministrationView.vue'),
+            },
+            {
+              path: '/administration/users',
+              name: 'usersManagement',
+              component: () => import('../views/administracao/UsersManagementView.vue'),
+            },
+            {
+              path: '/administration/machines',
+              name: 'machinesManagement',
+              component: () => import('../views/administracao/MachinesManagementView.vue'),
+            },
+            {
+              path: '/administration/sensors',
+              name: 'sensorsManagement',
+              component: () => import('../views/administracao/SensorsManagementView.vue'),
+            },
+          ],
+        },
       ],
     },
   ],
@@ -46,6 +74,11 @@ const router = createRouter({
 router.beforeEach((to) => {
   const authStore = useAuthStore()
   const requiresAuth = to.meta.requiresAuth
+  const requiredPermission = to.meta.requiredPermission as string | undefined
+
+  if (requiredPermission && !authStore.hasPermission(requiredPermission)) {
+    return { name: 'dashboard' }
+  }
 
   if (requiresAuth && !authStore.isAuthenticated) {
     return { name: 'login' }
