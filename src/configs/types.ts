@@ -35,3 +35,45 @@ export interface AuthState {
   permissions: Set<string>
   csrfToken: string | null
 }
+
+export interface MachineProfile{
+  id: number;
+  name: string;
+  description: string;
+  tensaoPadrao: number;
+  tensaoVariacao: number;
+  temperaturaPadrao: number;
+  temperaturaVariacao: number;
+  pressaoPadrao: number;
+  pressaoVariacao: number;
+  humidadePadrao: number;
+  humidadeVariacao: number;
+  sensores: SensorProfile[];
+}
+
+export interface MachineCreatePayload{
+  name: string;
+  description: string;
+  tensaoPadrao: number;
+  tensaoVariacao: number;
+  temperaturaPadrao: number;
+  temperaturaVariacao: number;
+  pressaoPadrao: number;
+  pressaoVariacao: number;
+  humidadePadrao: number;
+  humidadeVariacao: number;
+  sensores: number[];
+}
+
+export interface SensorCreatePayload{
+  name: string;
+  description: string;
+  type: 'TEMPERATURE' | 'HUMIDITY' | 'PRESSURE' | 'OPENDOOR' | 'VOLTAGE'
+}
+
+export interface SensorProfile{
+  id: number;
+  name: string;
+  description: string;
+  type: 'TEMPERATURE' | 'HUMIDITY' | 'PRESSURE' | 'OPENDOOR' | 'VOLTAGE'
+}
