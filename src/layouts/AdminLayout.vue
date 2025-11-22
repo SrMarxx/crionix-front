@@ -16,39 +16,11 @@ import { RouterView } from 'vue-router'
 </template>
 
 <style scoped>
-.app-layout {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  background: var(--bg-main);
-}
-
-.base-content {
-  display: flex;
-  flex: 1;
-  min-height: 0;
-  flex-direction: column;
-}
-
-.main-content {
-  flex-grow: 1;
-  overflow-y: auto;
-  background: var(--bg-main);
-}
-
-.app-footer {
-  text-align: center;
-  font-size: 0.95rem;
-  color: var(--text-subtitle);
-  padding: 1.1rem 0 0.7rem 0;
-  background: none;
-}
 
 .admin-dashboard {
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0 1.2rem;
   box-sizing: border-box;
 }
 
