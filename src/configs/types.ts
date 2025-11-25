@@ -1,5 +1,5 @@
 export interface UserProfile {
-  id: string
+  userId: string
   name: string
   cpf: string
   nascimento: string
@@ -76,4 +76,74 @@ export interface SensorProfile{
   name: string;
   description: string;
   type: 'TEMPERATURE' | 'HUMIDITY' | 'PRESSURE' | 'OPENDOOR' | 'VOLTAGE'
+}
+
+export interface ResumoResponseDTO {
+  equipamentos: Equipamentos;
+  pendentes: ManutencoesPendentes;
+  concluidas: ManutencoesConcluidas;
+  falhas: TaxaFalha;
+}
+
+export interface Equipamentos {
+  quantidadeAtual: number;
+  vsMesAnterior: number;
+}
+
+export interface ManutencoesPendentes {
+  quantidadePendentes: number;
+  quantidadeUrgentes: number;
+}
+
+export interface ManutencoesConcluidas {
+  quantidadeAtual: number;
+  vsMesAnterior: number;
+}
+
+export interface TaxaFalha {
+  quantidadeFalha: number;
+  vsMesAnterior: number;
+}
+
+export interface PerformanceProfile{
+  setor: 'ACOUGUE' | 'PADARIA' | 'FRUTAS' | 'LATICINIOS';
+  performance: number;
+}
+
+export interface ManutencaoResponseDTO {
+  id: number;
+  maquina: string;
+  colaborador: string;
+  dataCriacao: string; // Usualmente LocalDateTime é serializado como string (ISO 8601)
+  dataLimite: string;
+  ativo: boolean;
+  descricao: string;
+  prioridade: 'URGENTE' | 'ALTA' | 'MEDIA' | 'BAIXA';
+  tipo: 'PREVENTIVA' | 'CORRETIVA' | 'PREDITIVA';
+  dataConclusao: string | null; // Caso venha nulo
+  conclusao: 'SUCESSO' | 'FALHA' | 'ADIAMENTO';
+  relatorio: string;
+  setor: 'ACOUGUE' | 'PADARIA' | 'FRUTAS' | 'LATICINIOS';
+}
+export interface ManutencaoRequestDTO {
+  maquina: number;
+  colaborador: string; // UUID geralmente serializado como string
+  dataLimite: string;  // LocalDateTime serializado em formato ISO 8601 string
+  descricao: string;
+  prioridade: 'URGENTE' | 'ALTA' | 'MEDIA' | 'BAIXA';
+  tipo: 'PREVENTIVA' | 'CORRETIVA' | 'PREDITIVA';
+}
+export interface ManutencaoConclusaoDTO{
+  conclusao: 'SUCESSO' | 'FALHA' | 'ADIAMENTO';
+  relatorio: string;
+}
+export interface LeituraResponseDTO {
+  id: number;
+  valor: number;
+  timestamp: string; // LocalDateTime serializado como string (ISO 8601)
+  tipo: 'TEMPERATURE' | 'HUMIDITY' | 'PRESSURE' | 'OPENDOOR' | 'VOLTAGE';
+}
+export interface UserUpdateDTO {
+  name: string;
+  email: string;
 }

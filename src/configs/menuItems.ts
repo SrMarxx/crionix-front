@@ -18,12 +18,6 @@ export const menuItems = [
     requiredPermission: 'VISUALIZAR',
   },
   {
-    title: 'Relatórios',
-    path: '/reports',
-    icon: 'fa-file-text',
-    requiredPermission: 'VISUALIZAR',
-  },
-  {
     title: 'Administração',
     path: '/administration',
     icon: 'fa-cogs',

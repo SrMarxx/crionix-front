@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import type { Ref } from 'vue'
-import type { UserProfile, UserCreatePayload } from '@/configs/types'
+import type { UserProfile, UserCreatePayload, UserUpdateDTO } from '@/configs/types'
 import axiosInstance from '@/api/axiosConfig'
 
 const users: Ref<UserProfile[]> = ref([])
 const isLoading: Ref<boolean> = ref(true)
 const showCreateModal = ref(false)
+const showEditModal = ref(false)
 const createForm = ref<UserCreatePayload>({
   name: '',
   cpf: '',
@@ -14,7 +15,13 @@ const createForm = ref<UserCreatePayload>({
   email: '',
   cargo: 'COLABORADOR'
 })
+const editForm = ref<UserUpdateDTO>({
+  name: '',
+  email: ''
+})
+const editingUserId = ref<string|null>(null)
 const formError = ref<string|null>(null)
+const editError = ref<string|null>(null)
 const search = ref('')
 
 const cargoOptions = [
@@ -24,7 +31,6 @@ const cargoOptions = [
 
 function formatBRDate(dateStr: string) {
   if (!dateStr) return ''
-  // Espera yyyy-MM-dd, ADC p/ retornar dd/MM/yyyy
   const parts = dateStr.split('-')
   if (parts.length !== 3) return dateStr
   return `${parts[2]}/${parts[1]}/${parts[0]}`
@@ -56,6 +62,7 @@ function closeCreateModal() {
   showCreateModal.value = false
   formError.value = null
 }
+
 async function submitCreate() {
   formError.value = null
   if (
@@ -74,15 +81,48 @@ async function submitCreate() {
     await fetchUsers()
   } catch (err: unknown) {
     if (err instanceof Error) {
-    console.error('Mensagem de erro:', err.message);
-  } else {
-    console.error('Erro desconhecido:', err);
-  }
+      formError.value = err.message
+      console.error('Mensagem de erro:', err.message);
+    } else {
+      formError.value = 'Erro desconhecido'
+      console.error('Erro desconhecido:', err);
+    }
   }
 }
-function editUser(user: UserProfile) {
-  alert(`Editar usuário: ${user.name} (implementar)`)
+
+// EDITAÇÃO
+function openEditModal(user: UserProfile) {
+  editingUserId.value = user.userId
+  editForm.value = { name: user.name, email: user.email }
+  showEditModal.value = true
+  editError.value = null
 }
+function closeEditModal() {
+  showEditModal.value = false
+  editError.value = null
+  editingUserId.value = null
+}
+async function submitEdit() {
+  editError.value = null
+  if (!editForm.value.name.trim() || !editForm.value.email.trim()) {
+    editError.value = 'Preencha todos os campos obrigatórios.'
+    return
+  }
+  try {
+    await axiosInstance.patch(`/users/${editingUserId.value}`, editForm.value)
+    closeEditModal()
+    await fetchUsers()
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      editError.value = err.message
+      console.error('Mensagem de erro:', err.message)
+    } else {
+      editError.value = 'Erro desconhecido ao editar usuário.'
+      console.error('Erro desconhecido:', err)
+    }
+  }
+}
+
 const filteredUsers = computed(() => {
   if (!search.value) return users.value
   const term = search.value.toLowerCase()
@@ -125,14 +165,14 @@ const filteredUsers = computed(() => {
         </tr>
       </thead>
       <tbody>
-        <tr v-for="user in filteredUsers" :key="user.id">
+        <tr v-for="user in filteredUsers" :key="user.userId">
           <td>{{ user.name }}</td>
           <td>{{ user.email }}</td>
           <td>{{ user.cargo }}</td>
           <td>{{ user.matricula }}</td>
           <td>{{ formatBRDate(user.nascimento) }}</td>
           <td>
-            <button class="users-edit-btn" @click="editUser(user)">
+            <button class="users-edit-btn" @click="openEditModal(user)">
               <i class="fa fa-edit"></i> Editar
             </button>
           </td>
@@ -174,6 +214,28 @@ const filteredUsers = computed(() => {
           </button>
         </div>
         <p v-if="formError" class="form-error">{{ formError }}</p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Edição Usuário -->
+  <div v-if="showEditModal" class="modal-overlay" @click.self="closeEditModal">
+    <div class="modal-content">
+      <h3 class="modal-title">Editar Usuário</h3>
+      <form @submit.prevent="submitEdit" autocomplete="off">
+        <label>Nome
+          <input v-model="editForm.name" autocomplete="off" required />
+        </label>
+        <label>E-mail
+          <input v-model="editForm.email" type="email" autocomplete="off" required />
+        </label>
+        <div class="modal-actions">
+          <button type="button" class="modal-cancel" @click="closeEditModal">Cancelar</button>
+          <button type="submit" class="modal-save">
+            <i class="fa fa-save"></i> Salvar Alterações
+          </button>
+        </div>
+        <p v-if="editError" class="form-error">{{ editError }}</p>
       </form>
     </div>
   </div>

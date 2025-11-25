@@ -3,15 +3,36 @@ import { ref, computed, onMounted } from 'vue'
 import type { MachineProfile, SensorProfile, MachineCreatePayload } from '@/configs/types'
 import axiosInstance from '@/api/axiosConfig'
 
+// Estado principal
 const machines = ref<MachineProfile[]>([])
 const isLoading = ref(true)
 const search = ref('')
 const showCreateModal = ref(false)
+const showEditModal = ref(false)
+const createStep = ref(1)
+const editStep = ref(1)
 const allSensores = ref<SensorProfile[]>([])
 
-const createStep = ref(1)
+// Modal edição
+const editingMachineId = ref<number|null>(null)
+const editForm = ref<MachineCreatePayload>({
+  name: '', description: '', sensores: [],
+  tensaoPadrao: 0, tensaoVariacao: 0,
+  temperaturaPadrao: 0, temperaturaVariacao: 0,
+  pressaoPadrao: 0, pressaoVariacao: 0,
+  humidadePadrao: 0, humidadeVariacao: 0
+})
 
-// Labels e ícones para os tipos de sensor
+// Modal criação
+const createForm = ref<MachineCreatePayload>({
+  name: '', description: '', sensores: [],
+  tensaoPadrao: 0, tensaoVariacao: 0,
+  temperaturaPadrao: 0, temperaturaVariacao: 0,
+  pressaoPadrao: 0, pressaoVariacao: 0,
+  humidadePadrao: 0, humidadeVariacao: 0
+})
+
+// Tipos de sensor
 const sensorTypeLabels: Record<SensorProfile['type'], string> = {
   TEMPERATURE: 'Temperatura',
   HUMIDITY: 'Umidade',
@@ -27,35 +48,31 @@ const sensorTypeIcons: Record<SensorProfile['type'], string> = {
   VOLTAGE:     'fa-bolt'
 }
 
-// Busca na API
+// Buscas
 async function fetchMachines() {
   isLoading.value = true
   try {
     const resp = await axiosInstance.get<MachineProfile[]>('/maquinas')
-    // Garante sempre sensores como array vazio se não vier do backend
     machines.value = resp.data.map(m =>
       ({ ...m, sensores: Array.isArray(m.sensores) ? m.sensores : [] })
     )
-  } catch (error) {
-    console.error('Erro ao buscar máquinas:', error)
-  } finally {
-    isLoading.value = false
-  }
+  } finally { isLoading.value = false }
 }
+
 async function fetchSensores() {
   try {
     const resp = await axiosInstance.get<SensorProfile[]>('/sensores')
     allSensores.value = resp.data
-  } catch (error) {
-    console.error('Erro ao buscar sensores:', error)
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      console.error('Mensagem de erro:', err.message)
+    } else {
+      console.error('Erro desconhecido:', err)
+    }
   }
 }
 
-// Inicialização
-onMounted(() => {
-  fetchMachines()
-  fetchSensores()
-})
+onMounted(() => { fetchMachines(); fetchSensores() })
 
 const filteredMachines = computed(() => {
   if (!search.value) return machines.value
@@ -80,10 +97,7 @@ function sensorIcons(machine: MachineProfile) {
   }))
 }
 
-// Controle do modal multi-etapa
-function nextStep() { createStep.value = 2 }
-function prevStep() { createStep.value = 1 }
-
+// Modal Criação
 function openCreateModal() {
   showCreateModal.value = true
   createStep.value = 1
@@ -96,41 +110,51 @@ function openCreateModal() {
     humidadePadrao: 0, humidadeVariacao: 0
   })
 }
-
 function closeCreateModal() {
   showCreateModal.value = false
   createStep.value = 1
 }
-
-// Atenção: sensores agora é number[] (array de ID)
-const createForm = ref<MachineCreatePayload>({
-  name: '', description: '',
-  tensaoPadrao: 0, tensaoVariacao: 0,
-  temperaturaPadrao: 0, temperaturaVariacao: 0,
-  pressaoPadrao: 0, pressaoVariacao: 0,
-  humidadePadrao: 0, humidadeVariacao: 0,
-  sensores: []
-})
-
+function nextStep() { createStep.value = 2 }
+function prevStep() { createStep.value = 1 }
 async function submitCreate() {
-  try {
-    // Valida dados mínimos (por etapa)
-    if (createStep.value === 1) {
-      // Etapa 1: pode customizar ou fazer focus-to-next campo inválido
-      nextStep()
-      return
-    }
-    // Etapa 2: salvar
-    await axiosInstance.post('/maquinas', createForm.value)
-    closeCreateModal()
-    await fetchMachines()
-  } catch (error) {
-    alert('Erro ao criar máquina: ' + error)
-  }
+  if (createStep.value === 1) { createStep.value = 2; return }
+  await axiosInstance.post('/maquinas', createForm.value)
+  closeCreateModal()
+  await fetchMachines()
 }
 
-function editMachine(machine: MachineProfile) {
-  alert(`Editar máquina: ${machine.name}`)
+// Modal Edição
+function openEditModal(machine: MachineProfile) {
+  showEditModal.value = true
+  editStep.value = 1
+  editingMachineId.value = machine.id
+  fetchSensores()
+  editForm.value = {
+    name: machine.name,
+    description: machine.description,
+    sensores: Array.isArray(machine.sensores) ? machine.sensores.map(s => s.id) : [],
+    tensaoPadrao: machine.tensaoPadrao,
+    tensaoVariacao: machine.tensaoVariacao,
+    temperaturaPadrao: machine.temperaturaPadrao,
+    temperaturaVariacao: machine.temperaturaVariacao,
+    pressaoPadrao: machine.pressaoPadrao,
+    pressaoVariacao: machine.pressaoVariacao,
+    humidadePadrao: machine.humidadePadrao,
+    humidadeVariacao: machine.humidadeVariacao
+  }
+}
+function closeEditModal() {
+  showEditModal.value = false
+  editStep.value = 1
+  editingMachineId.value = null
+}
+function nextEditStep() { editStep.value = 2 }
+function prevEditStep() { editStep.value = 1 }
+async function submitEdit() {
+  if (editStep.value === 1) { editStep.value = 2; return }
+  await axiosInstance.patch(`/maquinas/${editingMachineId.value}`, editForm.value)
+  closeEditModal()
+  await fetchMachines()
 }
 </script>
 
@@ -205,7 +229,7 @@ function editMachine(machine: MachineProfile) {
               <span v-if="!machine.sensores || machine.sensores.length === 0">-</span>
             </td>
             <td>
-              <button class="machines-edit-btn" @click="editMachine(machine)">
+              <button class="machines-edit-btn" @click="openEditModal(machine)">
                 <i class="fa fa-edit"></i> Editar
               </button>
             </td>
@@ -214,12 +238,11 @@ function editMachine(machine: MachineProfile) {
       </table>
     </div>
 
-    <!-- Modal Step-by-step Criação Máquina -->
+    <!-- MODAL CRIAÇÃO (multi-etapa igual ao exemplo anterior) -->
     <div v-if="showCreateModal" class="modal-overlay" @click.self="closeCreateModal">
       <div class="modal-content">
         <h3 class="modal-title">Novo Equipamento</h3>
         <form @submit.prevent="submitCreate">
-          <!-- Etapa 1: dados básicos -->
           <template v-if="createStep === 1">
             <label>Nome
               <input v-model="createForm.name" required />
@@ -241,7 +264,6 @@ function editMachine(machine: MachineProfile) {
               </button>
             </div>
           </template>
-          <!-- Etapa 2: métricas e faixas -->
           <template v-else>
             <label>Tensão Padrão (V)
               <input v-model.number="createForm.tensaoPadrao" type="number" required min="0" />
@@ -271,6 +293,68 @@ function editMachine(machine: MachineProfile) {
               <button type="button" class="modal-cancel" @click="prevStep">&larr; Voltar</button>
               <button type="submit" class="modal-save">
                 <i class="fa fa-plus"></i> Criar Equipamento
+              </button>
+            </div>
+          </template>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL EDIÇÃO (idem, apenas usando editForm/editStep) -->
+    <div v-if="showEditModal" class="modal-overlay" @click.self="closeEditModal">
+      <div class="modal-content">
+        <h3 class="modal-title">Editar Equipamento</h3>
+        <form @submit.prevent="submitEdit">
+          <template v-if="editStep === 1">
+            <label>Nome
+              <input v-model="editForm.name" required />
+            </label>
+            <label>Descrição
+              <input v-model="editForm.description" required />
+            </label>
+            <label>Sensores Associados
+              <select v-model="editForm.sensores" multiple>
+                <option v-for="s in allSensores" :key="s.id" :value="s.id">
+                  {{ s.name }} ({{ sensorTypeLabels[s.type] }})
+                </option>
+              </select>
+            </label>
+            <div class="modal-actions">
+              <button type="button" class="modal-cancel" @click="closeEditModal">Cancelar</button>
+              <button type="button" class="modal-save" @click="nextEditStep">
+                Próximo &rarr;
+              </button>
+            </div>
+          </template>
+          <template v-else>
+            <label>Tensão Padrão (V)
+              <input v-model.number="editForm.tensaoPadrao" type="number" required min="0" />
+            </label>
+            <label>Variação Segura de Tensão (V)
+              <input v-model.number="editForm.tensaoVariacao" type="number" required min="0" />
+            </label>
+            <label>Temperatura Padrão (°C)
+              <input v-model.number="editForm.temperaturaPadrao" type="number" required />
+            </label>
+            <label>Variação Segura de Temperatura (°C)
+              <input v-model.number="editForm.temperaturaVariacao" type="number" required />
+            </label>
+            <label>Pressão Padrão (bar)
+              <input v-model.number="editForm.pressaoPadrao" type="number" required />
+            </label>
+            <label>Variação Segura de Pressão (bar)
+              <input v-model.number="editForm.pressaoVariacao" type="number" required />
+            </label>
+            <label>Umidade Padrão (%)
+              <input v-model.number="editForm.humidadePadrao" type="number" required min="0" max="100" />
+            </label>
+            <label>Variação Segura de Umidade (%)
+              <input v-model.number="editForm.humidadeVariacao" type="number" required min="0" max="100" />
+            </label>
+            <div class="modal-actions">
+              <button type="button" class="modal-cancel" @click="prevEditStep">&larr; Voltar</button>
+              <button type="submit" class="modal-save">
+                <i class="fa fa-save"></i> Salvar Alterações
               </button>
             </div>
           </template>

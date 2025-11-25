@@ -29,14 +29,24 @@ const router = createRouter({
           component: () => import('../views/MaintenancesView.vue'),
         },
         {
-          path: '/equipments',
-          name: 'equipments',
-          component: () => import('../views/EquipamentsView.vue'),
+          path: '/maintenances/:id',
+          name: 'maintenance-details',
+          component: () => import('../views/MaintenanceDetailsView.vue')
         },
         {
-          path: '/reports',
-          name: 'reports',
-          component: () => import('../views/ReportsView.vue'),
+          path: '/equipments',
+          name: 'equipments',
+          component: () => import('../views/EquipmentsView.vue'),
+        },
+        {
+          path: '/equipments/:id',
+          name: 'equipments-details',
+          component: () => import('../views/EquipmentsDetailsView.vue')
+        },
+        {
+          path: '/profile',
+          name: 'profile',
+          component: () => import('../views/ProfileView.vue'),
         },
         {
           path: '/administration',
