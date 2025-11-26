@@ -41,7 +41,6 @@ async function fetchManutencoes() {
       params: { page: page.value, size: size.value }
     })
     manutencao.value = response.data.content ?? response.data
-    totalPages.value = response.data.totalPages ?? 1
     errorMessage.value = ''
   } catch (error) {
     errorMessage.value = 'Erro ao carregar dados das manutenções.'
@@ -49,6 +48,15 @@ async function fetchManutencoes() {
     console.error(error)
   } finally {
     isLoading.value = false
+  }
+}
+
+async function fetchTotalPaginas() {
+  try{
+    const response = await axiosInstance.get('/manutencao/pages')
+    totalPages.value = response.data.totalPages ?? 1
+  } catch (err){
+    console.error(err)
   }
 }
 
@@ -141,6 +149,7 @@ onMounted(async () => {
   await fetchManutencoes()
   await fetchUsuarios()
   await fetchMaquinas()
+  await fetchTotalPaginas()
 })
 
 // Helpers de status/prioridade/card
